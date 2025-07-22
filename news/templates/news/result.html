@@ -1,0 +1,142 @@
+{% extends "news/base.html" %}
+
+{% block title %}Analysis Results - TruthLens{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <!-- Header -->
+                <div class="text-center mb-5 fade-in">
+                    <h1 class="hero-title" style="font-size: 2.8rem;">
+                        <i class="fas fa-chart-bar me-3"></i>
+                        Analysis Complete
+                    </h1>
+                    <p class="hero-subtitle">Comprehensive AI-powered news verification results</p>
+                </div>
+
+                <!-- Main Results Card -->
+                <div class="newspaper-card p-5 fade-in">
+                    <!-- Classification Banner -->
+                    <div class="mb-5">
+                        {% if classification == "real" %}
+                            <div class="classification-real">
+                                <h2 class="mb-2">
+                                    <i class="fas fa-shield-check me-3"></i>
+                                    VERIFIED AUTHENTIC NEWS
+                                </h2>
+                                <p class="mb-0 fs-5 opacity-90">
+                                    Our AI analysis indicates this content is likely legitimate journalism
+                                </p>
+                            </div>
+                        {% else %}
+                            <div class="classification-fake">
+                                <h2 class="mb-2">
+                                    <i class="fas fa-exclamation-triangle me-3"></i>
+                                    POTENTIAL MISINFORMATION DETECTED
+                                </h2>
+                                <p class="mb-0 fs-5 opacity-90">
+                                    This content exhibits patterns commonly found in fake news
+                                </p>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Detailed Analysis Grid -->
+                    <div class="row mb-5">
+                        <div class="col-md-6 mb-4">
+                            <div class="p-4 bg-light rounded">
+                                <h6 class="text-muted text-uppercase small mb-2">
+                                    <i class="fas fa-percentage me-2"></i>Confidence Level
+                                </h6>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge badge-custom bg-primary fs-5 me-3">
+                                        {{ confidence|floatformat:1 }}%
+                                    </span>
+                                    <small class="text-muted">Algorithm certainty</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="p-4 bg-light rounded">
+                                <h6 class="text-muted text-uppercase small mb-2">
+                                    <i class="fas fa-book-open me-2"></i>Readability Score
+                                </h6>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge badge-custom bg-info fs-5 me-3">
+                                        {{ readability|floatformat:1 }}
+                                    </span>
+                                    <small class="text-muted">Reading difficulty level</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-4">
+                            <div class="p-4 bg-light rounded">
+                                <h6 class="text-muted text-uppercase small mb-2">
+                                    <i class="fas fa-heart me-2"></i>Sentiment Analysis
+                                </h6>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge badge-custom fs-5 me-3
+                                        {% if sentiment|lower == 'positive' %}bg-success 
+                                        {% elif sentiment|lower == 'negative' %}bg-danger
+                                        {% else %}bg-warning text-dark{% endif %}">
+                                        {{ sentiment|title }} Tone
+                                    </span>
+                                    <small class="text-muted">Overall emotional sentiment of the content</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Summary Section -->
+                    <div class="mb-5">
+                        <h4 class="mb-3">
+                            <i class="fas fa-robot me-2 text-primary"></i>
+                            AI-Generated Summary
+                        </h4>
+                        <div class="p-4 border-start border-primary border-4 bg-light">
+                            <p class="mb-0 fs-5 lh-lg">{{ summary }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="text-center">
+                        <form action="{% url 'download_pdf' %}" method="get" class="d-inline me-3">
+                            <button type="submit" class="btn btn-outline-custom btn-lg">
+                                <i class="fas fa-file-pdf me-2"></i>
+                                Download Detailed Report
+                            </button>
+                        </form>
+                        <a href="{% url 'home' %}" class="btn btn-analyze btn-lg">
+                            <i class="fas fa-search me-2"></i>
+                            Analyze Another Article
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Additional Information -->
+                <div class="newspaper-card p-4 mt-4 fade-in">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <i class="fas fa-info-circle text-primary mb-2" style="font-size: 1.5rem;"></i>
+                            <h6>How It Works</h6>
+                            <small class="text-muted">Our AI analyzes linguistic patterns, source credibility, and content structure</small>
+                        </div>
+                        <div class="col-md-4">
+                            <i class="fas fa-shield-alt text-success mb-2" style="font-size: 1.5rem;"></i>
+                            <h6>Accuracy</h6>
+                            <small class="text-muted">Trained on thousands of verified news articles and fact-checked content</small>
+                        </div>
+                        <div class="col-md-4">
+                            <i class="fas fa-clock text-warning mb-2" style="font-size: 1.5rem;"></i>
+                            <h6>Real-time</h6>
+                            <small class="text-muted">Instant analysis with comprehensive reporting in seconds</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,179 @@
+{% extends "news/base.html" %}
+
+{% block title %}TruthLens - AI News Verification & Analysis{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div class="text-center fade-in">
+                    <h1 class="hero-title">
+                        Verify News with AI Precision
+                    </h1>
+                    <p class="hero-subtitle">
+                        Paste any news article to instantly analyze its authenticity, get AI-powered summaries, 
+                        sentiment analysis, and readability scores. Fight misinformation with technology.
+                    </p>
+                </div>
+
+                <!-- Analysis Form -->
+                <div class="newspaper-card p-5 fade-in mt-4">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label for="article-input" class="form-label">
+                                <i class="fas fa-newspaper me-2"></i>
+                                News Article Content
+                            </label>
+                            {{ form.article }}
+                            <div class="form-text text-muted mt-2">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Paste the complete news article text for the most accurate analysis results.
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button class="btn btn-analyze" type="submit">
+                                <i class="fas fa-search me-2"></i>
+                                Analyze Article
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Results Section -->
+                {% if classification %}
+                <div class="newspaper-card p-5 fade-in mt-4">
+                    <div class="row">
+                        <div class="col-12">
+                            <!-- Classification Result -->
+                            <div class="mb-4">
+                                {% if classification == "real" %}
+                                    <div class="classification-real">
+                                        <h3 class="mb-2">
+                                            <i class="fas fa-check-circle me-2"></i>
+                                            VERIFIED NEWS
+                                        </h3>
+                                        <p class="mb-0 opacity-90">This article appears to be legitimate news content</p>
+                                    </div>
+                                {% else %}
+                                    <div class="classification-fake">
+                                        <h3 class="mb-2">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            SUSPICIOUS CONTENT
+                                        </h3>
+                                        <p class="mb-0 opacity-90">This article shows characteristics of misinformation</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Analysis Details -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <h6 class="text-muted text-uppercase small mb-2">Confidence Level</h6>
+                                    <span class="badge badge-custom bg-secondary fs-6">
+                                        {{ confidence|floatformat:1 }}% Confidence
+                                    </span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <h6 class="text-muted text-uppercase small mb-2">Readability Score</h6>
+                                    <span class="badge badge-custom bg-info fs-6">
+                                        {{ readability|floatformat:1 }} Reading Level
+                                    </span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <h6 class="text-muted text-uppercase small mb-2">Sentiment Analysis</h6>
+                                    <span class="badge badge-custom fs-6
+                                        {% if sentiment|lower == 'positive' %}bg-success 
+                                        {% elif sentiment|lower == 'negative' %}bg-danger
+                                        {% else %}bg-warning text-dark{% endif %}">
+                                        {{ sentiment|title }} Tone
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Summary -->
+                            <div class="mt-4">
+                                <h6 class="text-muted text-uppercase small mb-3">AI-Generated Summary</h6>
+                                <div class="p-3 bg-light rounded">
+                                    <p class="mb-0">{{ summary }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="mt-4 text-center">
+                                <form action="{% url 'download_pdf' %}" method="get" class="d-inline me-3">
+                                    <button class="btn btn-outline-custom" type="submit">
+                                        <i class="fas fa-file-pdf me-2"></i>
+                                        Download Report
+                                    </button>
+                                </form>
+                                <a href="{% url 'home' %}" class="btn btn-outline-custom">
+                                    <i class="fas fa-plus me-2"></i>
+                                    Analyze Another
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="section-divider"></div>
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div class="text-center mb-5">
+                    <h2 class="hero-title" style="font-size: 2.5rem;">How TruthLens Works</h2>
+                    <p class="hero-subtitle">Advanced AI technology meets journalism integrity</p>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="feature-card p-4 text-center">
+                            <div class="feature-icon ai">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <h5 class="fw-bold mb-3">AI Classification</h5>
+                            <p class="text-muted">
+                                Our machine learning model analyzes linguistic patterns, 
+                                source credibility, and content structure to determine authenticity.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="feature-card p-4 text-center">
+                            <div class="feature-icon summary">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <h5 class="fw-bold mb-3">Smart Summarization</h5>
+                            <p class="text-muted">
+                                Advanced NLP extracts key information and generates 
+                                concise summaries while preserving essential context.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="feature-card p-4 text-center">
+                            <div class="feature-icon insights">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h5 class="fw-bold mb-3">Deep Insights</h5>
+                            <p class="text-muted">
+                                Comprehensive analysis including sentiment detection, 
+                                readability metrics, and bias identification.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

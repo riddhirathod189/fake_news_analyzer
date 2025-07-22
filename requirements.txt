@@ -1,0 +1,9 @@
+django
+pandas
+scikit-learn
+gensim
+textstat
+textblob
+reportlab
+sumy
+joblib
