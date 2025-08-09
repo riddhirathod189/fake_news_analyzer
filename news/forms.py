@@ -14,3 +14,6 @@ class NewsForm(forms.Form):
         label='News Article Content',
         help_text='Paste the complete news article text for the most accurate analysis results.'
     )
+    
+class ImageUploadForm(forms.Form):
+    image = forms.ImageField()

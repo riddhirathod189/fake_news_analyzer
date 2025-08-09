@@ -1,4 +1,5 @@
 {% extends "news/base.html" %}
+{% load static %}
 
 {% block title %}TruthLens - AI News Verification & Analysis{% endblock %}
 
@@ -41,6 +42,188 @@
                         </div>
                     </form>
                 </div>
+                
+                <!-- OCR / Image Upload Section -->
+                <div class="newspaper-card p-5 fade-in mt-5">
+                    <h3 class="mb-4 text-center hero-title fs-2">
+                        Capture or Upload News Image <span class="text-muted fs-5">(OCR)</span>
+                    </h3>
+                    <div class="row justify-content-center mb-4">
+                        <div class="col-auto d-flex flex-wrap gap-2">
+                            <button type="button" id="start-camera-btn" class="btn btn-analyze px-4 py-2 shadow-sm d-flex align-items-center">
+                                <i class="fas fa-video me-2"></i>Use Camera
+                            </button>
+                            <label class="btn btn-outline-custom px-4 py-2 shadow-sm d-flex align-items-center mb-0" for="file-input" style="cursor:pointer;">
+                                <i class="fas fa-upload me-2"></i>Choose File
+                                <input type="file" accept="image/*" id="file-input" name="image" hidden>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="row justify-content-center mb-3">
+                        <div class="col-auto text-center d-flex justify-content-center">
+                            <video id="video" autoplay playsinline
+                            style="max-width: 100%; display:none; border-radius:10px; border:2px solid #b6cef4; background:#f6f9fb; margin-bottom:10px; box-shadow:0 1px 8px #0001;">
+                            </video>
+                        </div>
+                    </div>
+
+                    <div class="row justify-content-center">
+                        <div class="col-auto text-center d-flex justify-content-center">
+                            <img id="preview"
+                                style="max-width: 100%; display:none; border-radius:10px; margin-top:10px; border:2px dashed #b6cef4; background:#f6f9fb;"
+                                alt="Image preview for cropping"/>
+                        </div>
+                    </div>
+
+                    <form id="upload-form" method="post" enctype="multipart/form-data" action="{% url 'ocr_upload' %}">
+                        {% csrf_token %}
+                        <input type="file" name="image" id="cropped-image-input" hidden required>
+                        <div class="d-flex flex-wrap gap-3 justify-content-center mt-4">
+                            <button type="button"
+                                    class="btn btn-outline-primary d-flex align-items-center"
+                                    id="crop-btn" disabled>
+                                <i class="fas fa-crop me-2"></i>Crop Image
+                            </button>
+                            <button type="submit"
+                                    class="btn btn-analyze d-flex align-items-center fs-5 px-4 py-2"
+                                    id="analyze-btn" style="transition:.1s;" disabled>
+                                <i class="fas fa-search me-2"></i>Analyze Extracted Text
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Take a photo or upload a screenshot of a news article—crop to focus on the text for best OCR quality.
+                        </small>
+                    </div>
+                </div>
+
+                <!-- CropperJS CSS (v1.5.13) -->
+                <link  href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+
+                <!-- CropperJS JS (v1.5.13) -->
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+                <script>
+                    const startCameraBtn = document.getElementById('start-camera-btn');
+                    const video = document.getElementById('video');
+                    const preview = document.getElementById('preview');
+                    const fileInput = document.getElementById('file-input');
+                    const croppedImageInput = document.getElementById('cropped-image-input');
+                    const cropBtn = document.getElementById('crop-btn');
+                    const analyzeBtn = document.getElementById('analyze-btn');
+                    const uploadForm = document.getElementById('upload-form');
+
+                    let stream = null;
+                    let cropper = null;
+                    let cameraCaptured = false;
+
+                    // Stop webcam if running
+                    function stopWebcam() {
+                        if (stream) {
+                            stream.getTracks().forEach(track => track.stop());
+                            stream = null;
+                        }
+                        video.style.display = 'none';
+                        video.srcObject = null;
+                    }
+
+                    // Start webcam
+                    startCameraBtn.onclick = async () => {
+                        stopWebcam();
+                        try {
+                            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                            video.srcObject = stream;
+                            video.style.display = 'block';
+                            preview.style.display = 'none';
+                            fileInput.value = '';
+                            croppedImageInput.value = '';
+                            analyzeBtn.disabled = true;
+                            cropBtn.disabled = false;
+                            cameraCaptured = false;
+                        } catch (err) {
+                            alert('Error accessing camera: ' + err.message);
+                        }
+                    };
+
+                    // File upload
+                    fileInput.onchange = function () {
+                        stopWebcam();
+                        const file = this.files[0];
+                        if (!file) return;
+
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            preview.src = e.target.result;
+                            preview.style.display = 'block';
+                            video.style.display = 'none';
+
+                            if (cropper) cropper.destroy();
+                            cropper = new Cropper(preview, { aspectRatio: NaN });
+                            analyzeBtn.disabled = true;
+                            cropBtn.disabled = false;
+                            cameraCaptured = false;
+                        };
+                        reader.readAsDataURL(file);
+                    };
+
+                    // Crop button
+                    cropBtn.onclick = function () {
+                        // If webcam is active and user hasn't captured yet
+                        if (video.style.display === 'block' && !cameraCaptured) {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = video.videoWidth;
+                            canvas.height = video.videoHeight;
+                            canvas.getContext('2d').drawImage(video, 0, 0);
+
+                            const dataURL = canvas.toDataURL('image/png');
+                            preview.src = dataURL;
+                            preview.style.display = 'block';
+                            video.style.display = 'none';
+
+                            stopWebcam();
+
+                            if (cropper) cropper.destroy();
+                            cropper = new Cropper(preview, { aspectRatio: NaN });
+
+                            cameraCaptured = true;
+                            analyzeBtn.disabled = true;
+                            return;
+                        }
+
+                        // If cropper is ready, then crop
+                        if (cropper) {
+                            const croppedCanvas = cropper.getCroppedCanvas();
+                            console.log(croppedCanvas)
+                            if (!croppedCanvas) {
+                                alert('Please crop the image first.');
+                                return;
+                            }
+
+                            croppedCanvas.toBlob(function (blob) {
+                                const file = new File([blob], 'cropped.png', { type: 'image/png' });
+                                const dt = new DataTransfer();
+                                dt.items.add(file);
+                                croppedImageInput.files = dt.files;
+
+                                analyzeBtn.disabled = false;
+                            }, 'image/png');
+                        } else {
+                            alert('Please choose a file or capture from camera.');
+                        }
+                    };
+
+                    // Prevent submit without crop
+                    uploadForm.onsubmit = function (e) {
+                        if (!croppedImageInput.files.length) {
+                            e.preventDefault();
+                            alert('Please crop the image before submitting!');
+                        }
+                    };
+                </script>
 
                 <!-- Results Section -->
                 {% if classification %}
