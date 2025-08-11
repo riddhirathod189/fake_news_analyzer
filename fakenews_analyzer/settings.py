@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-l^*8c@ib#u)qwm%ov6iw6+61bihfh_5^h86jfg^=yzg1q@2f15'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["fakenewsanalyse.pythonanywhere.com","localhost", "127.0.0.1"]
 
 
 # Application definition
@@ -49,6 +49,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware'
 ]
 
 ROOT_URLCONF = 'fakenews_analyzer.urls'
@@ -118,6 +119,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 STATIC_URL = '/static/'
 STATICFILES_DIRS = []
+
+# This is the directory where Django's `collectstatic` command
+# will gather all your static files for production.
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# This setting tells WhiteNoise to handle your static files
+# for production, compressing them and adding a unique hash.
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
